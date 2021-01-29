@@ -1,0 +1,57 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2 
+kind: Deployment 
+metadata: 
+  name: pushinsights-local-deployment 
+  labels:
+    app: pushinsights 
+spec: 
+  selector: 
+    matchLabels:
+      app:  pushinsights  
+  replicas: 2 # tells deployment to run 2 pods matching the template 
+  template: 
+    metadata: 
+      labels: 
+        app: pushinsights
+    spec: 
+      containers: 
+      - name: backend
+        image: pushinsights/backend_app:1.0
+        ports: 
+        - containerPort: 8000
+      - name: frontend
+        image: pushinsights/frontend:1.0
+        ports: 
+        - containerPort: 3000 
+      - name: db
+        image: pushinsights/postgres:1.0
+        ports: 
+        - containerPort: 8000 
+--- 
+# https://kubernetes.io/docs/concepts/services-networking/service/#defining-a-service  
+kind: Service 
+apiVersion: v1 
+metadata: 
+  name: pushinsights-local-service 
+spec: 
+  selector: 
+    app: pushinsights 
+  ports: 
+  - name: backend
+    protocol: TCP 
+    port: 8000 
+    targetPort: 8000 
+    nodePort: 31000 
+  - name: frontend
+    protocol: TCP 
+    port: 3000 
+    targetPort: 3000 
+    nodePort: 32000
+  - name: db
+    protocol: TCP 
+    port: 8100 
+    targetPort: 8000 
+    nodePort: 30200
+  type: NodePort 
+  
+
